@@ -16,3 +16,12 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+$router->get('flights', ['uses' => 'FlightController@list']);
+
+$router->get('airports', ['uses' => 'AirportController@list']);
+
+$router->get('airport/{id}', ['uses' => 'AirportController@getAirport']);
+
+$router->get('airlines', ['uses' => 'AirlineController@list']);
+
