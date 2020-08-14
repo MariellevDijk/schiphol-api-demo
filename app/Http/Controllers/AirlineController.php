@@ -20,7 +20,7 @@ class AirlineController extends Controller
         $distanceUnit = $request->get('distanceUnit', 'km');
 
         if (!in_array($distanceUnit, ['km', 'mi'])) {
-            abort(400, 'Invalid distance Unit');
+            abort(400, '400 - Invalid distance Unit');
         }
 
         return $airlineService->getSortedAirlines($distanceUnit);

@@ -33,7 +33,7 @@ class AirportController extends Controller
         $distanceUnit = $request->get('distanceUnit', 'km');
 
         if (!in_array($distanceUnit, ['km', 'mi'])) {
-            abort(404, 'Invalid distance Unit');
+            abort(404, '404 - Invalid distance Unit');
         }
 
         return $this->airportService->getAirportDistance($distanceUnit);
@@ -49,7 +49,7 @@ class AirportController extends Controller
         $id = strtoupper($id);
 
         if (!array_key_exists($id, $airports)) {
-            abort(400, 'Invalid Airport ID');
+            abort(400, '400 - Invalid Airport ID');
         }
 
         return $airports[$id];

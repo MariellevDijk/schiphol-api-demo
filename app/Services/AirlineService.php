@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class AirlineService
@@ -30,9 +31,16 @@ class AirlineService
      */
     public function getAirlines(): array
     {
-        if ($this->airlines === null) {
+        if (!Cache::has('airlines') && $this->airlines === null) {
             $response = Http::get('http://flightassets.datasavannah.com/test/airlines.json');
+
+            if (!$response->successful()) {
+                abort(503, '503 - Service Unavailable');
+            }
             $this->airlines = $response->json();
+            Cache::put('airlines', $this->airlines, new \DateTime('tomorrow'));
+        } else if (Cache::has('airlines')){
+            $this->airlines = Cache::get('airlines');
         }
 
         return $this->airlines;

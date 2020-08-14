@@ -21,7 +21,7 @@ class FlightController extends Controller
             $flights = $flightService->getFlightsByAirlineId($request->get('airlineId'));
 
             if ($flights === null) {
-                abort(400, 'Invalid Airline Id');
+                abort(400, '400 - Invalid Airline Id');
             }
             return $flights;
         }

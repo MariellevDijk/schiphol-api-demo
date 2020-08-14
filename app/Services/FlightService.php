@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -39,9 +40,16 @@ class FlightService
      */
     public function getFlights()
     {
-        if ($this->flights === null) {
+        if (!Cache::has('flights') && $this->flights === null) {
             $response = Http::get('http://flightassets.datasavannah.com/test/flights.json');
+
+            if (!$response->successful()) {
+                abort(503, '503 - Service Unavailable');
+            }
             $this->flights = $response->json();
+            Cache::put('flights', $this->flights, new \DateTime('tomorrow'));
+        } else if (Cache::has('flights')){
+            $this->flights = Cache::get('flights');
         }
 
         return $this->flights;
