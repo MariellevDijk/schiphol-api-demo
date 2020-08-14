@@ -19,6 +19,7 @@ class FlightService
      * @var array
      */
     private $flightsByAirline = [];
+
     /**
      * @var AirportService
      */
@@ -32,7 +33,6 @@ class FlightService
     {
         $this->airportService = $airportService;
     }
-
 
     /**
      * @return array|mixed
@@ -62,9 +62,10 @@ class FlightService
     }
 
     /**
+     * @param string $distanceUnit
      * @return array
      */
-    public function getDistanceFlownByAirline()
+    public function getDistanceFlownByAirline(string $distanceUnit): array
     {
         $flightsByAirline = $this->getFlightsByAirline();
 
@@ -74,7 +75,7 @@ class FlightService
             foreach ($airline as $flight) {
                 $latlong = $this->airportService->getLatLong($flight['arrivalAirportId']);
 
-                $distance = $this->airportService->calculateDistance($latlong);
+                $distance = $this->airportService->calculateDistance($latlong, $distanceUnit);
 
                 if (!array_key_exists($flight['airlineId'], $distanceByAirline)) {
                     $distanceByAirline[$flight['airlineId']] = 0;
@@ -84,5 +85,14 @@ class FlightService
         }
 
         return $distanceByAirline;
+    }
+
+    /**
+     * @param string $airlineId
+     * @return array|null
+     */
+    public function getFlightsByAirlineId(string $airlineId): ?array
+    {
+        return $this->getFlightsByAirline()[$airlineId] ?? null;
     }
 }

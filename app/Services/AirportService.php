@@ -16,22 +16,24 @@ class AirportService
      * @var array|mixed
      */
     private $airports;
+
     /**
      * @var array
      */
     private $sortedAirports = [];
+
     /**
      * @var Geotools
      */
-    private $geotools;
+    private $geoTools;
 
     /**
      * AirportService constructor.
-     * @param Geotools $geotools
+     * @param Geotools $geoTools
      */
-    public function __construct(Geotools $geotools)
+    public function __construct(Geotools $geoTools)
     {
-        $this->geotools = $geotools;
+        $this->geoTools = $geoTools;
     }
 
     /**
@@ -50,7 +52,7 @@ class AirportService
     /**
      * @return array
      */
-    public function getSortedAirports()
+    public function getSortedAirports(): array
     {
         if (empty($this->sortedAirports)) {
             $airports = $this->getAirports();
@@ -63,15 +65,16 @@ class AirportService
     }
 
     /**
+     * @param string $distanceUnit
      * @return array
      */
-    public function getAirportDistance()
+    public function getAirportDistance(string $distanceUnit): array
     {
         $airports = $this->getAirports();
         $airportsSortedByDistance = [];
 
         foreach ($airports as $airport) {
-            $distance = $this->calculateDistance($airport);
+            $distance = $this->calculateDistance($airport, $distanceUnit);
             $airportsSortedByDistance[] = [
                 'id' => $airport['id'],
                 'name' => $airport['name'],
@@ -79,7 +82,7 @@ class AirportService
             ];
         }
 
-        usort($airportsSortedByDistance, function ($a, $b) {
+        usort($airportsSortedByDistance, static function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
 
@@ -87,10 +90,10 @@ class AirportService
     }
 
     /**
-     * @param $airportId
+     * @param string $airportId
      * @return array
      */
-    public function getLatLong($airportId)
+    public function getLatLong(string $airportId): array
     {
         $airport = $this->getSortedAirports()[$airportId];
 
@@ -101,10 +104,11 @@ class AirportService
     }
 
     /**
-     * @param $airport
+     * @param array $airport
+     * @param string $distanceUnit
      * @return float|int
      */
-    public function calculateDistance($airport)
+    public function calculateDistance(array $airport, string $distanceUnit)
     {
         $airports = $this->getSortedAirports();
 
@@ -113,8 +117,8 @@ class AirportService
 
         $coordA = new Coordinate([$start['latitude'], $start['longitude']]);
         $coordB = new Coordinate([$end['latitude'], $end['longitude']]);
-        $distance = $this->geotools->distance()->setFrom($coordA)->setTo($coordB);
+        $distance = $this->geoTools->distance()->setFrom($coordA)->setTo($coordB);
 
-        return $distance->in('km')->haversine();
+        return $distance->in($distanceUnit)->haversine();
     }
 }

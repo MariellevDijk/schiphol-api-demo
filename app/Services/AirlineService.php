@@ -10,6 +10,7 @@ class AirlineService
      * @var array
      */
     private $airlines;
+
     /**
      * @var FlightService
      */
@@ -38,13 +39,14 @@ class AirlineService
     }
 
     /**
+     * @param string $distanceUnit
      * @return array
      */
-    public function getSortedAirlines(): array
+    public function getSortedAirlines(string $distanceUnit): array
     {
         $airlines = $this->getAirlines();
 
-        $distances = $this->flightService->getDistanceFlownByAirline();
+        $distances = $this->flightService->getDistanceFlownByAirline($distanceUnit);
 
         foreach ($airlines as $airline) {
             $airlinesByDistanceTraveled[] = [
@@ -54,7 +56,7 @@ class AirlineService
             ];
         }
 
-        usort($airlinesByDistanceTraveled, function ($a, $b) {
+        usort($airlinesByDistanceTraveled, static function ($a, $b) {
             return $a['distance'] <=> $b['distance'];
         });
 
