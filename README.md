@@ -8,7 +8,7 @@ To install this project, clone this repository and run `composer install`.
 
 ### System Requirements
 
-- PHP 7.1 or higher
+- PHP 7.3 or higher
 - Composer
 - An active internet connection
 
