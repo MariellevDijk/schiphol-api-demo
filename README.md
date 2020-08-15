@@ -1,24 +1,38 @@
-# Lumen PHP Framework
+# Schiphol API Demo
 
-[![Build Status](https://travis-ci.org/laravel/lumen-framework.svg)](https://travis-ci.org/laravel/lumen-framework)
-[![Total Downloads](https://poser.pugx.org/laravel/lumen-framework/d/total.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![Latest Stable Version](https://poser.pugx.org/laravel/lumen-framework/v/stable.svg)](https://packagist.org/packages/laravel/lumen-framework)
-[![License](https://poser.pugx.org/laravel/lumen-framework/license.svg)](https://packagist.org/packages/laravel/lumen-framework)
+Small webservice built with [Lumen](https://lumen.laravel.com/docs) that wraps the Schiphol API and adds some functionality like distance calculation and filtering.
 
-Laravel Lumen is a stunningly fast PHP micro-framework for building web applications with expressive, elegant syntax. We believe development must be an enjoyable, creative experience to be truly fulfilling. Lumen attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as routing, database abstraction, queueing, and caching.
+## Installation and Requirements
 
-## Official Documentation
+To install this project, clone this repository and run `composer install`.
 
-Documentation for the framework can be found on the [Lumen website](https://lumen.laravel.com/docs).
+### System Requirements
 
-## Contributing
+- PHP 7.1 or higher
+- Composer
+- An active internet connection
 
-Thank you for considering contributing to Lumen! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Running the application
+For development and testing purposes, the default PHP development server is sufficient.
 
-## Security Vulnerabilities
+```bash
+$ php -S localhost:8080 -t public
+```
 
-If you discover a security vulnerability within Lumen, please send an e-mail to Taylor Otwell at taylor@laravel.com. All security vulnerabilities will be promptly addressed.
+## Using the API
+The API has 4 endpoints that may be used without authentication or any special configuration. Responses will usually be JSON formatted, except when an error occurs. A good way to check for errors is the HTTP status code. In normal cases this should be `200 OK`. When something goes wrong, the appropriate HTTP status code and message will be returned.
 
-## License
-
-The Lumen framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- `/flights` returns a JSON formatted list of flights from the AMS Airport ( Amsterdam Schiphol ) containing the airline ID, flight number, departure airport ID (this should always be `"AMS"`) and arrival airport ID.
+    - Example: `{"airlineId":"PK","flightNumber":763,"departureAirportId":"AMS","arrivalAirportId":"FRA"}`
+    - Optionally: Use `?airlineId={airlineId}` to see all flights from one airline
+- `/airlines` returns a JSON formatted list of airlines with their distance flown today. 
+    - Example: `{"id":"KL","name":"KLM","distance":516991.93944829697}`
+    - Optionally: Use `?distanceUnit={km|mi}` to select the type of unit the flown distance needs to be.
+- `/airports` returns a JSON formatted list of airports, sorted ascending on the distance from AMS Airport ( Amsterdam Schiphol )
+    - Example: `{"id":"LHR","name":"Heathrow Airport","distance":370.316816493085}`
+    - Optionally: Use  `?distanceUnit={km|mi}` to select the type of unit the distance needs to be.
+- `/airport/{id}` returns a JSON formatted list based on the Airport ID, like `"LHR"`, with latitude and longitude of the airport and the country it's based in.
+    - Example: `{"id":"LHR","latitude":51.469604,"longitude":-0.453566,"name":"Heathrow Airport","city":"London","countryId":"GB"}`
+    
+## Caching
+Keep in mind, Schiphol API Requests are refreshed and cached until midnight. For the cache to work properly, ensure that the folder `storage/framework/cache/data` is writeable.
