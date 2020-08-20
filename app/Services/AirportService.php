@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use League\Geotools\Coordinate\Coordinate;
 use League\Geotools\Geotools;
 
@@ -42,19 +41,7 @@ class AirportService
      */
     public function getAirports()
     {
-        if (!Cache::has('airports') && $this->airports === null) {
-            $response = Http::get('http://flightassets.datasavannah.com/test/airports.json');
-
-            if (!$response->successful()) {
-                abort(503, '503 - Service Unavailable');
-            }
-            $this->airports = $response->json();
-            Cache::put('airports', $this->airports, new \DateTime('tomorrow'));
-        } else if (Cache::has('airports')) {
-            $this->airports = Cache::get('airports');
-        }
-
-        return $this->airports;
+        return $this->airports = Cache::get('airports');
     }
 
     /**

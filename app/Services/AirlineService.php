@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 
 class AirlineService
 {
@@ -18,12 +17,19 @@ class AirlineService
     private $flightService;
 
     /**
+     * @var AirportService
+     */
+    private $airportService;
+
+    /**
      * AirlineService constructor.
      * @param FlightService $flightService
+     * @param AirportService $airportService
      */
-    public function __construct(FlightService $flightService)
+    public function __construct(FlightService $flightService, AirportService $airportService)
     {
         $this->flightService = $flightService;
+        $this->airportService = $airportService;
     }
 
     /**
@@ -31,19 +37,7 @@ class AirlineService
      */
     public function getAirlines(): array
     {
-        if (!Cache::has('airlines') && $this->airlines === null) {
-            $response = Http::get('http://flightassets.datasavannah.com/test/airlines.json');
-
-            if (!$response->successful()) {
-                abort(503, '503 - Service Unavailable');
-            }
-            $this->airlines = $response->json();
-            Cache::put('airlines', $this->airlines, new \DateTime('tomorrow'));
-        } else if (Cache::has('airlines')){
-            $this->airlines = Cache::get('airlines');
-        }
-
-        return $this->airlines;
+        return $this->airlines = Cache::get('airlines');
     }
 
     /**
@@ -54,7 +48,7 @@ class AirlineService
     {
         $airlines = $this->getAirlines();
 
-        $distances = $this->flightService->getDistanceFlownByAirline($distanceUnit);
+        $distances = $this->getDistanceFlownByAirline($distanceUnit);
 
         foreach ($airlines as $airline) {
             $airlinesByDistanceTraveled[] = [
@@ -69,5 +63,31 @@ class AirlineService
         });
 
         return $airlinesByDistanceTraveled;
+    }
+
+    /**
+     * @param string $distanceUnit
+     * @return array
+     */
+    public function getDistanceFlownByAirline(string $distanceUnit): array
+    {
+        $flightsByAirline = $this->flightService->getFlightsByAirline();
+
+        $distanceByAirline = [];
+
+        foreach ($flightsByAirline as $airline) {
+            foreach ($airline as $flight) {
+                $airlineId = $flight['airlineId'];
+                $latlong = $this->airportService->getLatLong($flight['arrivalAirportId']);
+                $distance = $this->airportService->calculateDistance($latlong, $distanceUnit);
+
+                if (!array_key_exists($airlineId, $distanceByAirline)) {
+                    $distanceByAirline[$airlineId] = 0;
+                }
+                $distanceByAirline[$airlineId] += $distance;
+            }
+        }
+
+        return $distanceByAirline;
     }
 }
