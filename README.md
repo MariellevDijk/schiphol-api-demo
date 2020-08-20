@@ -19,6 +19,11 @@ For development and testing purposes, the default PHP development server is suff
 $ php -S localhost:8080 -t public
 ```
 
+To execute the Cache, run
+```bash
+$ php artisan api:cache:update
+```
+
 ## Using the API
 The API has 4 endpoints that may be used without authentication or any special configuration. Responses will usually be JSON formatted, except when an error occurs. A good way to check for errors is the HTTP status code. In normal cases this should be `200 OK`. When something goes wrong, the appropriate HTTP status code and message will be returned.
 
